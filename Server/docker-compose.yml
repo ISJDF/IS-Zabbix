@@ -1,0 +1,39 @@
+    version: "3"
+
+    services:
+      zabbix-server:
+      restart: always
+      image: zabbix/zabbix-server-mysql:ubuntu-4.2.latest
+      ports:
+          — “10050:10050”
+          — “10051:10051”
+      environment:
+      DB_SERVER_HOST: 130.130.52.252
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: ${zabbix_db_pass}
+      MYSQL_DATABASE: zabbix
+      ZBX_STARTPINGERS: 10
+      ZBX_STARTVMWARECOLLECTORS: 5
+      ZBX_VMWAREFREQUENCY: 60
+      ZBX_HOUSEKEEPINGFREQUENCY: 12
+      ZBX_CACHESIZE: 2G
+      ZBX_HISTORYCACHESIZE: 400M
+      ZBX_HISTORYINDEXCACHESIZE: 512M
+    
+
+    zabbix-web-nginx-mysql:
+     restart: always
+     depends_on: "zabbix-server"
+     image: zabbix/zabbix-web-nginx-mysql:latest
+     ports:
+      — “80:80”
+     links:
+      — zabbix-server:zabbix-server
+     environment:
+      DB_SERVER_HOST: 130.130.52.252
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: ${zabbix_db_pass}
+      MYSQL_DATABASE: zabbix
+      ZBX_SERVER_HOST: "http://zabbix-server"
+      PHP_TZ: Europe/London
+      ZBX_SERVER_NAME: Informed
